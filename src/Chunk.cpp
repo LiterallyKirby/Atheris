@@ -1,39 +1,38 @@
 #include "Chunk.h"
-#include <cstdlib>
-#include <cmath>
-#include <iostream>
-#include <glm/glm.hpp>
 #include <FastNoiseLite.h>
-
+#include <cmath>
+#include <cstdlib>
+#include <glm/glm.hpp>
+#include <iostream>
+#include <algorithm>
 Chunk::Chunk(int chunkX, int chunkZ, int w, int h, int d)
-    : cx(chunkX), cz(chunkZ), width(w), height(h), depth(d), blocks((size_t)w*h*d, Block{})
-{}
+    : cx(chunkX), cz(chunkZ), width(w), height(h), depth(d),
+      blocks((size_t)w * h * d, Block{}) {}
 
-Chunk::Chunk(int chunkX, int chunkZ, int w, int h, int d, const std::vector<uint8_t>& blockData)
-    : cx(chunkX), cz(chunkZ), width(w), height(h), depth(d)
-{
-    blocks.reserve(blockData.size());
-    for (auto b : blockData) {
-        Block blk;
-        blk.type = static_cast<BlockType>(b);
-        blk.ramp = RampDirection::None;
-        blocks.push_back(blk);
-    }
+Chunk::Chunk(int chunkX, int chunkZ, int w, int h, int d,
+             const std::vector<uint8_t> &blockData)
+    : cx(chunkX), cz(chunkZ), width(w), height(h), depth(d) {
+  blocks.reserve(blockData.size());
+  for (auto b : blockData) {
+    Block blk;
+    blk.type = static_cast<BlockType>(b);
+    blk.ramp = RampDirection::None;
+    blocks.push_back(blk);
+  }
 }
-
 
 
 
 void Chunk::generateSimpleTerrain() {
     FastNoiseLite baseNoise;
     baseNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    baseNoise.SetFrequency(0.06f); // slightly higher frequency → smoother hills
-    baseNoise.SetFractalOctaves(2); // fewer octaves → smoother
+    baseNoise.SetFrequency(0.015f);  // Very low frequency → broad changes
+    baseNoise.SetFractalOctaves(2);  // Slight complexity
     baseNoise.SetSeed(0);
 
     FastNoiseLite detailNoise;
     detailNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    detailNoise.SetFrequency(0.12f); // smaller fine detail
+    detailNoise.SetFrequency(0.08f); // Small detail noise
     detailNoise.SetFractalOctaves(1);
     detailNoise.SetSeed(12345);
 
@@ -47,18 +46,19 @@ void Chunk::generateSimpleTerrain() {
             int worldX = cx * width + x;
             int worldZ = cz * depth + z;
 
-            // Base mountain shape
-            float heightNoise = baseNoise.GetNoise((float)worldX, (float)worldZ);
+            // Gentle base height variation
+            float heightNoise = baseNoise.GetNoise((float)worldX, (float)worldZ) * 0.2f; // small amplitude but not zero
 
-            // Soft detail blending
-            float detail = detailNoise.GetNoise((float)worldX, (float)worldZ) * 0.1f;
+            // Minimal fine detail
+            float detail = detailNoise.GetNoise((float)worldX, (float)worldZ) * 0.05f;
 
             float combinedNoise = heightNoise + detail;
 
-            // Smooth mountain shaping
-            combinedNoise = powf(combinedNoise * 0.5f + 0.5f, 1.3f) * 2.0f - 1.0f;
+            // Gentle smoothing curve
+            combinedNoise = powf(combinedNoise * 0.5f + 0.5f, 1.1f) * 2.0f - 1.0f;
 
-            int terrainHeight = (int)((combinedNoise + 1.0f) * 0.5f * (height * 0.35f)) + height / 4;
+            // Mostly flat with gentle undulations
+            int terrainHeight = (int)((combinedNoise + 1.0f) * 0.5f * (height * 0.2f)) + height * 0.5f;
             terrainHeight = std::max(1, std::min(terrainHeight, height - 1));
 
             for (int y = 0; y < height; ++y) {
@@ -82,7 +82,7 @@ void Chunk::generateSimpleTerrain() {
                     blocks[idx].type = BlockType::Dirt;
                 } else {
                     blocks[idx].type = BlockType::Stone;
-                    if (rand() % 100 < 3) {
+                    if (rand() % 100 < 2) { // rarer ores
                         blocks[idx].type = BlockType::Ore;
                     }
                 }
@@ -95,21 +95,10 @@ void Chunk::generateSimpleTerrain() {
 
 
 
-
-
-
-
-
 void Chunk::addRampsToTerrain() {
-    auto isRamp = [&](int x, int y, int z) -> bool {
-        if (x < 0 || x >= width || z < 0 || z >= depth || y < 0 || y >= height)
-            return false;
-        size_t idx = x + width * (y + height * z);
-        return blocks[idx].ramp != RampDirection::None;
-    };
-
     auto getTopHeight = [&](int x, int z) -> int {
-        if (x < 0 || x >= width || z < 0 || z >= depth) return -1;
+        if (x < 0 || x >= width || z < 0 || z >= depth)
+            return -1;
         for (int y = height - 1; y >= 0; --y) {
             size_t idx = x + width * (y + height * z);
             if (blocks[idx].type != BlockType::Air) {
@@ -119,108 +108,116 @@ void Chunk::addRampsToTerrain() {
         return -1;
     };
 
+    auto isAir = [&](int x, int y, int z) -> bool {
+        if (x < 0 || x >= width || z < 0 || z >= depth || y < 0 || y >= height)
+            return false;
+        size_t idx = x + width * (y + height * z);
+        return blocks[idx].type == BlockType::Air;
+    };
+
     struct Direction {
         int dx, dz;
         RampDirection rampDir;
+        const char* name;
     };
 
-    Direction dirs[] = {
-        {0, -1, RampDirection::North},       // North
-        {0, 1,  RampDirection::South},       // South
-        {1, 0,  RampDirection::East},        // East
-        {-1, 0, RampDirection::West},        // West
-        {1, -1, RampDirection::NorthEast},   // Northeast
-        {-1, -1, RampDirection::NorthWest},  // Northwest
-        {1, 1,  RampDirection::SouthEast},   // Southeast
-        {-1, 1,  RampDirection::SouthWest}   // Southwest
+    // Separate cardinal and diagonal directions
+    Direction cardinalDirs[] = {
+        {0, -1, RampDirection::North, "North"},
+        {0, 1, RampDirection::South, "South"},
+        {1, 0, RampDirection::East, "East"},
+        {-1, 0, RampDirection::West, "West"}
     };
 
-    std::vector<std::vector<bool>> rampVisited(width, std::vector<bool>(depth, false));
-    bool debugRampPlacement = false; // set true for debug
+    Direction diagonalDirs[] = {
+        {1, -1, RampDirection::NorthEast, "NorthEast"},
+        {-1, -1, RampDirection::NorthWest, "NorthWest"},
+        {1, 1, RampDirection::SouthEast, "SouthEast"},
+        {-1, 1, RampDirection::SouthWest, "SouthWest"}
+    };
 
-  
-auto shouldPlaceRamp = [&](int x, int z, Direction dir) -> bool {
-    int heightHere = getTopHeight(x, z);
-    int heightAhead = getTopHeight(x + dir.dx, z + dir.dz);
+    std::vector<std::vector<bool>> rampPlaced(width, std::vector<bool>(depth, false));
 
-    if (heightHere == -1 || heightAhead == -1) return false;
-
-    // Only 1-block drop
-    if (heightHere != heightAhead + 1) return false;
-
-    // Check ahead slope to avoid large ramps on mountains
-    int secondAheadHeight = getTopHeight(x + dir.dx * 2, z + dir.dz * 2);
-    if (secondAheadHeight != -1 && secondAheadHeight + 1 == heightHere) {
-        return false; // Slope continues, skip ramp
-    }
-
-    // Diagonal slopes require both orthogonal neighbors to match
-    if (dir.dx != 0 && dir.dz != 0) {
-        int heightX = getTopHeight(x + dir.dx, z);
-        int heightZ = getTopHeight(x, z + dir.dz);
-        if (heightHere - heightX != 1 || heightHere - heightZ != 1) {
-            return false;
-        }
-    }
-
-    // Randomize to keep chunkiness
-   // if (rand() % 100 < 15) return false;
-
-    return true;
-};
-
-
+    // For each position in the chunk
     for (int x = 0; x < width; ++x) {
         for (int z = 0; z < depth; ++z) {
+            if (rampPlaced[x][z]) continue;
+            
             int currentHeight = getTopHeight(x, z);
             if (currentHeight == -1) continue;
 
-            for (auto& dir : dirs) {
-                int nx = x + dir.dx;
-                int nz = z + dir.dz;
-                int neighborHeight = getTopHeight(nx, nz);
+            bool placedRamp = false;
 
-                if (neighborHeight != -1 &&
-                    !isRamp(nx, neighborHeight, nz) &&
-                    !rampVisited[nx][nz] &&
-                    shouldPlaceRamp(x, z, dir))
-                {
-                    size_t idx = nx + width * ((neighborHeight + 1) + height * nz);
+            // FIRST: Try cardinal directions (N, S, E, W)
+            for (auto& dir : cardinalDirs) {
+                int neighborX = x + dir.dx;
+                int neighborZ = z + dir.dz;
+                
+                if (neighborX < 0 || neighborX >= width || neighborZ < 0 || neighborZ >= depth)
+                    continue;
+                
+                if (rampPlaced[neighborX][neighborZ]) continue;
+                
+                int neighborHeight = getTopHeight(neighborX, neighborZ);
+                if (neighborHeight == -1) continue;
+                
+                int heightDiff = currentHeight - neighborHeight;
+                
+                if (heightDiff == 1) {
+                    if (isAir(neighborX, neighborHeight + 1, neighborZ)) {
+                        size_t currentIdx = x + width * (currentHeight + height * z);
+                        BlockType materialType = blocks[currentIdx].type;
+                        
+                        size_t rampIdx = neighborX + width * ((neighborHeight + 1) + height * neighborZ);
+                        blocks[rampIdx].type = materialType;
+                        blocks[rampIdx].ramp = dir.rampDir;
+                        rampPlaced[neighborX][neighborZ] = true;
+                        
+                        std::cout << "Placed " << dir.name << " ramp at (" 
+                                  << neighborX << ", " << (neighborHeight + 1) << ", " << neighborZ 
+                                  << ") connecting height " << currentHeight << " to " << neighborHeight << "\n";
+                        
+                        placedRamp = true;
+                        break; // Stop after placing one ramp
+                    }
+                }
+            }
 
-                    if (nx >= 0 && nx < width &&
-                        nz >= 0 && nz < depth &&
-                        neighborHeight + 1 < height &&
-                        blocks[idx].type == BlockType::Air)
-                    {
-                        size_t higherIdx = x + width * (currentHeight + height * z);
-                        BlockType materialType = blocks[higherIdx].type;
-
-                        blocks[idx].type = materialType;
-                        blocks[idx].ramp = dir.rampDir;
-                        rampVisited[nx][nz] = true;
-
-                        if (debugRampPlacement) {
-                            blocks[idx].type = BlockType::Ore;
+            // SECOND: Only if no cardinal ramp was placed, try diagonal directions
+            if (!placedRamp) {
+                for (auto& dir : diagonalDirs) {
+                    int neighborX = x + dir.dx;
+                    int neighborZ = z + dir.dz;
+                    
+                    if (neighborX < 0 || neighborX >= width || neighborZ < 0 || neighborZ >= depth)
+                        continue;
+                    
+                    if (rampPlaced[neighborX][neighborZ]) continue;
+                    
+                    int neighborHeight = getTopHeight(neighborX, neighborZ);
+                    if (neighborHeight == -1) continue;
+                    
+                    int heightDiff = currentHeight - neighborHeight;
+                    
+                    if (heightDiff == 1) {
+                        if (isAir(neighborX, neighborHeight + 1, neighborZ)) {
+                            size_t currentIdx = x + width * (currentHeight + height * z);
+                            BlockType materialType = blocks[currentIdx].type;
+                            
+                            size_t rampIdx = neighborX + width * ((neighborHeight + 1) + height * neighborZ);
+                            blocks[rampIdx].type = materialType;
+                            blocks[rampIdx].ramp = dir.rampDir;
+                            rampPlaced[neighborX][neighborZ] = true;
+                            
+                            std::cout << "Placed " << dir.name << " ramp at (" 
+                                      << neighborX << ", " << (neighborHeight + 1) << ", " << neighborZ 
+                                      << ") connecting height " << currentHeight << " to " << neighborHeight << "\n";
+                            
+                            break; // Stop after placing one ramp
                         }
-
-                        std::cout << "Placed "
-                                  << (dir.rampDir == RampDirection::North ? "North" :
-                                      dir.rampDir == RampDirection::South ? "South" :
-                                      dir.rampDir == RampDirection::East ? "East" :
-                                      dir.rampDir == RampDirection::West ? "West" :
-                                      dir.rampDir == RampDirection::NorthEast ? "NE" :
-                                      dir.rampDir == RampDirection::NorthWest ? "NW" :
-                                      dir.rampDir == RampDirection::SouthEast ? "SE" : "SW")
-                                  << " ramp at (" << nx << ", " << (neighborHeight + 1) << ", " << nz << ")\n";
                     }
                 }
             }
         }
     }
 }
-
-
-
-
-
-

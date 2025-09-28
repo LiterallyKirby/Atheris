@@ -15,6 +15,9 @@ std::vector<Vertex> buildChunkMesh(const unsigned char* blocks, int width, int h
 
 void addCubeMesh(BlockType type, glm::vec3 pos, std::vector<Vertex>& verts);
 void addRampMesh(RampDirection dir, BlockType type, glm::vec3 pos, std::vector<Vertex>& verts);
-glm::vec2 getTextureCoordForBlock(BlockType type);
 
 
+void addVerticesForRampNorthEast(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts);
+void addVerticesForRampNorthWest(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts);
+void addVerticesForRampSouthEast(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts);
+void addVerticesForRampSouthWest(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts);

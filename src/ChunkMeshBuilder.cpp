@@ -117,12 +117,12 @@ void addCubeMesh(BlockType type, glm::vec3 pos, std::vector<Vertex>& verts) {
 }
 
 
+
 void addRampMesh(RampDirection dir, BlockType type, glm::vec3 pos, std::vector<Vertex>& verts) {
     glm::vec2 texCoord = getTextureCoordForBlock(type);
 
     switch (dir) {
         case RampDirection::North:
-            // Add vertices for a ramp facing north
             addVerticesForRampNorth(pos, texCoord, verts);
             break;
         case RampDirection::South:
@@ -134,10 +134,23 @@ void addRampMesh(RampDirection dir, BlockType type, glm::vec3 pos, std::vector<V
         case RampDirection::West:
             addVerticesForRampWest(pos, texCoord, verts);
             break;
+        case RampDirection::NorthEast:
+            addVerticesForRampNorthEast(pos, texCoord, verts);
+            break;
+        case RampDirection::NorthWest:
+            addVerticesForRampNorthWest(pos, texCoord, verts);
+            break;
+        case RampDirection::SouthEast:
+            addVerticesForRampSouthEast(pos, texCoord, verts);
+            break;
+        case RampDirection::SouthWest:
+            addVerticesForRampSouthWest(pos, texCoord, verts);
+            break;
         default:
             break;
     }
 }
+
 
 
 
@@ -343,13 +356,181 @@ void addVerticesForRampWest(glm::vec3 pos, glm::vec2 texCoord, std::vector<Verte
     }
 }
 
-glm::vec2 getTextureCoordForBlock(const Block& block) {
-    // Texture depends ONLY on material, not ramp
-    switch (block.type) {
-        case BlockType::Grass: return {0.0f, 0.0f};
-        case BlockType::Stone: return {0.25f, 0.0f};
-        case BlockType::Dirt:  return {0.5f, 0.0f};
-        case BlockType::Ore:   return {0.75f, 0.0f};
-        default: return {0.0f, 0.0f};
+
+
+
+void addVerticesForRampNorthEast(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts) {
+    // Corner ramp: high at (-0.5, -0.5), low at (+0.5, +0.5)
+    float vertices[] = {
+        // Bottom face (flat)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Diagonal sloped face (triangular)
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f,  // high corner
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  // low edge
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  // low edge
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  // low edge
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  // low edge  
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f,  // high corner
+
+        // North face (partial, triangular)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+
+        // West face (partial, triangular) 
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.5f, 1.0f,
+
+        // South face (vertical edge)
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  // degenerate for now
+
+        // East face (vertical edge)  
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f   // degenerate for now
+    };
+    
+    int numVerts = sizeof(vertices) / (5 * sizeof(float));
+    for (int i = 0; i < numVerts; i++) {
+        Vertex v;
+        v.pos = glm::vec3(vertices[i*5+0], vertices[i*5+1], vertices[i*5+2]) + pos;
+        v.tex = glm::vec2(vertices[i*5+3], vertices[i*5+4]) + texCoord;
+        verts.push_back(v);
     }
 }
+
+void addVerticesForRampNorthWest(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts) {
+    // Corner ramp: high at (+0.5, -0.5), low at (-0.5, +0.5)
+    float vertices[] = {
+        // Bottom face (flat)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Diagonal sloped face
+         0.5f,  0.5f, -0.5f,  1.0f, 0.0f,  // high corner
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  // low edge
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  // low edge
+         
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  // low edge
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  // low edge
+         0.5f,  0.5f, -0.5f,  1.0f, 0.0f,  // high corner
+
+        // North face (partial, triangular)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+
+        // East face (partial, triangular)
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.5f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f
+    };
+    
+    int numVerts = sizeof(vertices) / (5 * sizeof(float));
+    for (int i = 0; i < numVerts; i++) {
+        Vertex v;
+        v.pos = glm::vec3(vertices[i*5+0], vertices[i*5+1], vertices[i*5+2]) + pos;
+        v.tex = glm::vec2(vertices[i*5+3], vertices[i*5+4]) + texCoord;
+        verts.push_back(v);
+    }
+}
+
+void addVerticesForRampSouthEast(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts) {
+    // Corner ramp: high at (-0.5, +0.5), low at (+0.5, -0.5)
+    float vertices[] = {
+        // Bottom face (flat)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Diagonal sloped face
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  // high corner
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  // low edge
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  // low edge
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  // low edge
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  // low edge
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  // high corner
+
+        // South face (partial, triangular)
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+
+        // West face (partial, triangular)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.5f, 1.0f
+    };
+    
+    int numVerts = sizeof(vertices) / (5 * sizeof(float));
+    for (int i = 0; i < numVerts; i++) {
+        Vertex v;
+        v.pos = glm::vec3(vertices[i*5+0], vertices[i*5+1], vertices[i*5+2]) + pos;
+        v.tex = glm::vec2(vertices[i*5+3], vertices[i*5+4]) + texCoord;
+        verts.push_back(v);
+    }
+}
+
+void addVerticesForRampSouthWest(glm::vec3 pos, glm::vec2 texCoord, std::vector<Vertex>& verts) {
+    // Corner ramp: high at (+0.5, +0.5), low at (-0.5, -0.5)  
+    float vertices[] = {
+        // Bottom face (flat)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Diagonal sloped face
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  // high corner
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  // low edge
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  // low edge
+         
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  // low edge
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  // low edge
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  // high corner
+
+        // South face (partial, triangular)
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+
+        // East face (partial, triangular)
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.5f, 1.0f
+    };
+    
+    int numVerts = sizeof(vertices) / (5 * sizeof(float));
+    for (int i = 0; i < numVerts; i++) {
+        Vertex v;
+        v.pos = glm::vec3(vertices[i*5+0], vertices[i*5+1], vertices[i*5+2]) + pos;
+        v.tex = glm::vec2(vertices[i*5+3], vertices[i*5+4]) + texCoord;
+        verts.push_back(v);
+    }
+}
+
+

@@ -8,12 +8,60 @@
       "-std=c++17",
       "-c",
       "-o",
+      "build/Client.o",
+      "src/Client.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/Client.cpp",
+    "output": "/home/kirby/Programming/SS25/build/Client.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
       "build/main.o",
       "src/main.cpp"
     ],
     "directory": "/home/kirby/Programming/SS25",
     "file": "/home/kirby/Programming/SS25/src/main.cpp",
     "output": "/home/kirby/Programming/SS25/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "build/Camera.o",
+      "src/Camera.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/Camera.cpp",
+    "output": "/home/kirby/Programming/SS25/build/Camera.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "build/Network.o",
+      "src/Network.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/Network.cpp",
+    "output": "/home/kirby/Programming/SS25/build/Network.o"
   },
   {
     "arguments": [
@@ -56,108 +104,12 @@
       "-std=c++17",
       "-c",
       "-o",
-      "build/Camera.o",
-      "src/Camera.cpp"
+      "build/ChunkManager.o",
+      "src/ChunkManager.cpp"
     ],
     "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/Camera.cpp",
-    "output": "/home/kirby/Programming/SS25/build/Camera.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/Player.o",
-      "src/Player.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/Player.cpp",
-    "output": "/home/kirby/Programming/SS25/build/Player.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/ChunkMeshBuilder.o",
-      "src/ChunkMeshBuilder.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/ChunkMeshBuilder.cpp",
-    "output": "/home/kirby/Programming/SS25/build/ChunkMeshBuilder.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/Server.o",
-      "src/Server.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/Server.cpp",
-    "output": "/home/kirby/Programming/SS25/build/Server.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/Client.o",
-      "src/Client.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/Client.cpp",
-    "output": "/home/kirby/Programming/SS25/build/Client.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/Network.o",
-      "src/Network.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/Network.cpp",
-    "output": "/home/kirby/Programming/SS25/build/Network.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-Iinclude",
-      "-Wall",
-      "-Wextra",
-      "-std=c++17",
-      "-c",
-      "-o",
-      "build/ChunkLoader.o",
-      "src/ChunkLoader.cpp"
-    ],
-    "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/ChunkLoader.cpp",
-    "output": "/home/kirby/Programming/SS25/build/ChunkLoader.o"
+    "file": "/home/kirby/Programming/SS25/src/ChunkManager.cpp",
+    "output": "/home/kirby/Programming/SS25/build/ChunkManager.o"
   },
   {
     "arguments": [
@@ -200,11 +152,59 @@
       "-std=c++17",
       "-c",
       "-o",
-      "build/ChunkManager.o",
-      "src/ChunkManager.cpp"
+      "build/ChunkLoader.o",
+      "src/ChunkLoader.cpp"
     ],
     "directory": "/home/kirby/Programming/SS25",
-    "file": "/home/kirby/Programming/SS25/src/ChunkManager.cpp",
-    "output": "/home/kirby/Programming/SS25/build/ChunkManager.o"
+    "file": "/home/kirby/Programming/SS25/src/ChunkLoader.cpp",
+    "output": "/home/kirby/Programming/SS25/build/ChunkLoader.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "build/Server.o",
+      "src/Server.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/Server.cpp",
+    "output": "/home/kirby/Programming/SS25/build/Server.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "build/ChunkMeshBuilder.o",
+      "src/ChunkMeshBuilder.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/ChunkMeshBuilder.cpp",
+    "output": "/home/kirby/Programming/SS25/build/ChunkMeshBuilder.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "build/Player.o",
+      "src/Player.cpp"
+    ],
+    "directory": "/home/kirby/Programming/SS25",
+    "file": "/home/kirby/Programming/SS25/src/Player.cpp",
+    "output": "/home/kirby/Programming/SS25/build/Player.o"
   }
 ]

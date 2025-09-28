@@ -1,8 +1,8 @@
 
 #include "Block.h"
-
-glm::vec2 getTextureCoordForBlock(BlockType type) {
-    switch (type) {
+// Updated texture coordinate function to handle BlockType instead of Block
+glm::vec2 getTextureCoordForBlock(BlockType blockType) {
+    switch (blockType) {
         case BlockType::Grass: return {0.0f, 0.0f};
         case BlockType::Stone: return {0.25f, 0.0f};
         case BlockType::Dirt:  return {0.5f, 0.0f};
